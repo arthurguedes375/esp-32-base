@@ -10,3 +10,12 @@ CONFIG_FREERTOS_IDLE_TASK_STACKSIZE=4096
 # that allocate large stack variables; or better yet - use 
 # `std::thread::Builder::new().stack_size(XXX)` for spawning
 CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT=4096
+
+# ESP-IDF does NOT auto-detect flash size reliably in this setup, so we need to specify that it's a 4MB chip
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+
+
+# Increasing the max size of my binary code
+# CONFIG_PARTITION_TABLE_SINGLE_APP=y
+CONFIG_PARTITION_TABLE_CUSTOM=y
+# CONFIG_PARTITION_TABLE_FILENAME="partitions.csv"
