@@ -9,7 +9,14 @@ use std::{
 use esp_idf_hal::{self, gpio::PinDriver, io::Write, peripherals::Peripherals};
 use esp_idf_svc::{eventloop::EspSystemEventLoop, nvs::EspDefaultNvsPartition};
 
-use crate::{logical::http::server::HttpServer, physical::wireless::wifi::Wifi};
+use crate::{
+    logical::http::server::HttpServer,
+    physical::{
+        converters::adc::{ADCChannel, ADC},
+        peripherals::sensors::light::analog::LightAnalogSensor,
+        wireless::wifi::Wifi,
+    },
+};
 use std::thread;
 
 fn main() -> anyhow::Result<()> {
@@ -64,7 +71,28 @@ fn main() -> anyhow::Result<()> {
             }
         })?;
 
+    // Analog to digital converter
+    let adc1 = peripherals.adc1;
+    let adc = ADC::new(adc1)?;
+
+    // Light sensor
+    let light_sensor_pin = peripherals.pins.gpio34;
+    let mut light_sensor_analog_channel = ADCChannel::new(&adc.driver, light_sensor_pin)?;
+
+    let light_sensor_digital_pin = peripherals.pins.gpio25;
+    let light_sensor_digital =
+        PinDriver::input(light_sensor_digital_pin, esp_idf_hal::gpio::Pull::Floating)?;
+
     loop {
-        thread::sleep(Duration::from_millis(2_000));
+        log::info!("{}", light_sensor_analog_channel.read()?);
+        if light_sensor_digital.is_low() {
+            log::info!("OFF");
+        } else if light_sensor_digital.is_high() {
+            log::info!("ON");
+        } else {
+log::info!("")
+        }
+
+        thread::sleep(Duration::from_millis(300));
     }
 }
