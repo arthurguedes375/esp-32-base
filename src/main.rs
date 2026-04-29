@@ -10,10 +10,9 @@ use esp_idf_hal::{self, gpio::PinDriver, io::Write, peripherals::Peripherals};
 use esp_idf_svc::{eventloop::EspSystemEventLoop, nvs::EspDefaultNvsPartition};
 
 use crate::{
-    logical::http::server::HttpServer,
+    logical::{http::server::HttpServer, tcp::TcpServer},
     physical::{
         converters::adc::{ADCChannel, ADC},
-        peripherals::sensors::light::analog::LightAnalogSensor,
         wireless::wifi::Wifi,
     },
 };
@@ -28,6 +27,8 @@ fn main() -> anyhow::Result<()> {
     esp_idf_svc::log::EspLogger::initialize_default();
 
     log::info!("Started Testing!!");
+
+    let _tcp_server = TcpServer::new()?;
 
     let peripherals = Peripherals::take().unwrap();
 
@@ -90,7 +91,7 @@ fn main() -> anyhow::Result<()> {
         } else if light_sensor_digital.is_high() {
             log::info!("ON");
         } else {
-log::info!("")
+            log::error!("Received neither the is_low nor the is_high")
         }
 
         thread::sleep(Duration::from_millis(300));
